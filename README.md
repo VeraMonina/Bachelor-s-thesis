@@ -20,7 +20,7 @@ Model properties relevant for the method: a mixture-of-experts model (`DeepseekV
 
 ### Metrics
 
-Intrinsic metrics can be computed without training or fine-tuning the model. Extrinsic metrics require a model with the new vocabulary and are not yet computed (see Step 2).
+Intrinsic metrics can be computed without training or fine-tuning the model. Extrinsic metrics require a model with the new vocabulary and are not yet computed.
 
 | Type | Metric | What it measures | Source |
 | --- | --- | --- | --- |
