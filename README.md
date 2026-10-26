@@ -1,16 +1,4 @@
-# Tokenizer Vocabulary Allocation across Writing Systems
-
-Working repository for a bachelor's thesis on adapting the tokenizer of a pretrained LLM to several writing systems under a fixed vocabulary size, with one-to-many streaming translation as the target application. The repository holds the code, intermediate results and project notes. Each step has its own section below, so that the choices made earlier remain traceable when the next experiments are planned.
-
 Working thesis title: *Optimizing Tokenizer Vocabulary Allocation across Writing Systems under a Fixed Vocabulary Size for One-to-Many Streaming Translation.*
-
-## Status
-
-| Step | Content | State |
-| --- | --- | --- |
-| 1 | Results of the research internship: baseline, pruning, vocabulary substitution, FVT initialization | done (intrinsic evaluation only) |
-| 2 | Extrinsic evaluation and a second initialization method | planned |
-| 3 | Vocabulary allocation across scripts as an optimization problem | planned |
 
 ## Step 1. Results of the research internship
 
@@ -40,10 +28,7 @@ Intrinsic metrics can be computed without training or fine-tuning the model. Ext
 | Intrinsic | Bytes / characters per token | compression | standard |
 | Intrinsic | Rényi efficiency (α = 2.5) | balance of token frequencies, normalized by vocabulary size | Zouhar et al., 2023 |
 | Intrinsic | STRR | share of frequent words encoded as one token | Nayeem et al., 2025 |
-| Intrinsic | Tokenization premium | length of a text relative to its translation in a reference language | Petrov et al., 2023 |
-| Extrinsic | chrF / COMET, win rate, MMLU, latency | translation quality, forgetting, inference cost | planned |
-
-MorphScore (Arnett et al., 2025) was reviewed but is not part of the reported results.
+| Intrinsic | Tokenization premium | length of a text relative to its translation in a reference language | Petrov et al., 2023 |ч
 
 ### Data
 
@@ -99,46 +84,3 @@ Values are given as before → after adaptation.
 * Arabic: a slight deterioration in fertility and premium. The cause has not been investigated yet.
 * Russian and English: unchanged, as intended.
 
-### Known limitations and open questions
-
-* No extrinsic evaluation. The adapted embeddings and tokenizer exist as separate files and have not been assembled into a checkpoint, so translation quality, forgetting on the original languages and inference speed are unmeasured. Intrinsic metrics can be misleading on their own (Cognetta et al., 2024), and fertility and similar measures correlate weakly with downstream quality in the Russian adaptation study of Andriushchenko et al.
-* FVT is the only initialization method. The comparison with random initialization was planned but could not be run without extrinsic evaluation, and CLP+ (Yamaguchi et al., 2024) needs a helper model whose tokenizer matches the target vocabulary.
-* For Hindi, 367 of the 5,053 allocated slots were not filled (4,686 selected).
-* Slot allocation by (premium − 1) is a heuristic. It was not compared with alternatives.
-* Arabic became slightly worse. Possible causes are the small number of new tokens and the effect of pruning on existing Arabic merges.
-* The examples of Chinese tokens above appear to be traditional characters, while FLORES+ uses simplified Chinese. The share of traditional and simplified characters among the 515 tokens should be checked.
-* Verification prompts are in English, which may underestimate the probability of tokens from other scripts.
-
-## Next steps
-
-* Assemble a checkpoint with the adapted vocabulary and run extrinsic evaluation (chrF and COMET on FLORES+, MMLU for forgetting, latency).
-* Compare FVT with random initialization and with at least one method that does not depend on a helper model.
-* Check that every inserted token is actually produced by the final tokenizer, since a token inserted from a separate BPE model can conflict with the merge order of the target tokenizer.
-* Treat the division of free slots between scripts as an explicit optimization problem and compare it with the proportional rule.
-
-## Repository structure
-
-This is the planned layout and will be adjusted as the code is added.
-
-```
-.
-├── README.md
-├── step1_internship/
-│   ├── notebooks/        baseline metrics, result tables
-│   ├── src/              vocabulary analysis, under-trained token detection,
-│   │                     pruning, tokenizer training, FVT initialization
-│   └── results/          metric tables, lists of removed and added tokens
-└── notes/                short notes on papers and meeting decisions
-```
-
-## References
-
-* Petrov, La Malfa, Torr, Bibi. Language Model Tokenizers Introduce Unfairness Between Languages. NeurIPS 2023.
-* Zouhar et al. Tokenization and the Noiseless Channel. ACL 2023.
-* Cognetta et al. Two Counterexamples to Tokenization and the Noiseless Channel. 2024.
-* Nayeem et al. Beyond Fertility: Analyzing STRR as a Metric for Multilingual Tokenization Evaluation. arXiv:2510.09947, 2025.
-* Arnett, Hudspeth, O'Connor. Evaluating Morphological Alignment of Tokenizers in 70 Languages. arXiv:2507.06378, 2025.
-* Land, Bartolo. Fishing for Magikarp: Automatically Detecting Under-trained Tokens in Large Language Models. EMNLP 2024.
-* Gee, Zugarini, Rigutini, Torroni. Fast Vocabulary Transfer for Language Model Compression. EMNLP 2022, Industry Track.
-* Yamaguchi, Villavicencio, Aletras. An Empirical Study on Cross-lingual Vocabulary Adaptation for Efficient Language Model Inference. Findings of EMNLP 2024.
-* Andriushchenko et al. A Multi-Aspect Evaluation of Tokenizer Adaptation Methods for LLM on Russian. Doklady Mathematics, 2025.
